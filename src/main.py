@@ -19,6 +19,9 @@ class Data:
     # V1 视频轨道像素高度
     V1HEIGHT = 10
 
+    # 自定义快捷键
+    HOTKEY = "alt+q"
+
 
 def isColorSame(c1, c2):
     return c1[0] == c2[0] and c1[1] == c2[1] and c1[2] == c2[2]
@@ -27,6 +30,7 @@ def isColorSame(c1, c2):
 def getHeight():
     """
     获取时间轴面板上方的黄线在屏幕中的y高度
+    更新 Data 中 YELLOW_HEIGHT 的数值
     :return:
     """
     im = ImageGrab.grab()
@@ -44,9 +48,36 @@ def getHeight():
                 return
 
 
+def quickRemove():
+    """
+    删去pr中某一个视频片段的连贯操作
+    :return: 无返回
+    """
+    # 一定要保证是在主屏幕上
+    keyboard.wait(Data.HOTKEY)
+    p1 = pyautogui.position()
+    winsound.Beep(3000, 300)
+
+    keyboard.wait(Data.HOTKEY)
+    p2 = pyautogui.position()
+    winsound.Beep(3500, 300)
+
+    # 假设鼠标两个点都是黄线上方
+    pyautogui.click(p1.x, Data.YELLOW_HEIGHT)
+    pyautogui.hotkey('ctrl', 'k')
+    pyautogui.click(p2.x, Data.YELLOW_HEIGHT)
+    pyautogui.hotkey('ctrl', 'k')
+
+    pyautogui.click(p1.x + int(abs(p2.x - p1.x) / 2), Data.V1HEIGHT)
+    pyautogui.hotkey('backspace')
+    pyautogui.click(p1.x + int(abs(p2.x - p1.x) / 2), Data.V1HEIGHT + 2)
+    pyautogui.hotkey('backspace')
+    pyautogui.moveTo(p1)
+
+
 def main():
     hello()
-    keyboard.wait("alt+q")
+    keyboard.wait(Data.HOTKEY)
     getHeight()
     v1 = pyautogui.position()
     Data.V1HEIGHT = v1.y
@@ -54,39 +85,19 @@ def main():
     winsound.Beep(2700, 100)
     winsound.Beep(3000, 100)
     while True:
-        # 一定要保证是在主屏幕上
-        # keyboard.wait("shift+w")
-        keyboard.wait("alt+q")
-        p1 = pyautogui.position()
-        winsound.Beep(3000, 300)
-
-        keyboard.wait("alt+q")
-        p2 = pyautogui.position()
-        winsound.Beep(3500, 300)
-
-        # 假设鼠标两个点都是黄线上方
-        pyautogui.click(p1.x, Data.YELLOW_HEIGHT)
-        pyautogui.hotkey('ctrl', 'k')
-        pyautogui.click(p2.x, Data.YELLOW_HEIGHT)
-        pyautogui.hotkey('ctrl', 'k')
-
-        pyautogui.click(p1.x + int(abs(p2.x - p1.x) / 2), Data.V1HEIGHT)
-        pyautogui.hotkey('backspace')
-        pyautogui.click(p1.x + int(abs(p2.x - p1.x) / 2), Data.V1HEIGHT + 2)
-        pyautogui.hotkey('backspace')
-        pyautogui.moveTo(p1)
+        quickRemove()
 
 
 def hello():
-    hi = """
+    hi = f"""
     此程序使用方法：
     初始化：
         首先打开Pr界面
         V1轨道是要剪辑的轨道
-        放到V1轨道上按 Alt + Q，（只要保证鼠标y坐标是V1轨道高度就可以）
+        放到V1轨道上按 {Data.HOTKEY}，（只要保证鼠标y坐标是V1轨道高度就可以）
     使用：
-        鼠标放到左端点，按Alt Q
-        再到右侧端点，按Alt Q
+        鼠标放到左端点，按{Data.HOTKEY}
+        再到右侧端点，按{Data.HOTKEY}
         即可立刻删除这一段
     """
     print(hi)
